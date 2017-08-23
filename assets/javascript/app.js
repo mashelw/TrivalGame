@@ -1,115 +1,170 @@
-//question and answer variables
-var questions = {
-	q1 : {
-		question: "Who did Ross had a childhood crush on? ",    
-	 	correct: "Rachel"
-	},
-	q2 : {
-		question: "What is Monica's biggest pet peeve?",    
-	 	correct: "Animals dressed as humans"
-	 },
-	q3 : {
-		question: "Every week TV Guide comes to Chandler and Joey’s apartment. What name appears on the address label??", 
-		correct: "Miss Chanandler Bong",
-	},
-	q4 : {
-		question: "Rachel favorite movie:",    
-	 	correct: "Weekend at Bernie’s"
-	},
-	q5 : {
-		question: "What is Joey’s favorite food?",    
-	 	correct: "Two pizzas"
-	},
-}
 
-var choices = {
-	a1 : [ "Monica","Pheobe", "Jan", questions.q1.correct],
-	a2 : [ "Water rings on the coffee table",questions.q2.correct, "Crumbs","People who chew loudly"],
-	a3 : ["Chandler Bing", "Chanandler Bong", questions.q3.correct, "Chanandler"],
-	a4 : ["Dangerous Liaisons",questions.q4.correct,, "16 Candles","Pretty in Pink"],
-	a5 : ["Lasagna","Two pizzas","Cereal", questions.q5.correct],
-}
+var panel = $("#quiz-area");
+var countStartNumber = 30;
 
-var correctCount;
-var incorrectCount;
-var outOfTimeCount;
+// Question set
+var questions = [{
+  question: "Who did Ross had a childhood crush on? ",
+  answers: ["Monica","Pheobe", "Jan", "Rachel"],
+  correctAnswer: "Rachel",
+  image: ""
+}, {
+  question: "What is Monica's biggest pet peeve?",
+  answers: ["Water rings on the coffee table", "Animals dressed as humans", "Crumbs","People who chew loudly"],
+  correctAnswer: "Animals dressed as humans",
+  image: ""
+}, {
+  question: "Every week TV Guide comes to Chandler and Joey’s apartment. What name appears on the address label?",
+  answers: ["Chandler Bing", "Chanandler Bong", "Miss Chanandler Bong", "Chanandler"],
+  correctAnswer: "Miss Chanandler Bong",
+  image: ""
+}, {
+  question: "What is Joey’s favorite food?",
+  answers: ["Lasagna","Two pizzas","Cereal", "Two pizzas"],
+  correctAnswer: "Two pizzas",
+  image: ""
+}, {
+  question: "Rachel favorite movie:",
+  answers: ["Dangerous Liaisons","Weekend at Bernie’s", "16 Candles","Pretty in Pink"],
+  correctAnswer: "Weekend at Bernie’s",
+  image: ""
+}];
+// Variable to hold our setInterval
+var timer;
 
-var choice2;
-var choice3;
-var choice4;
+var game = {
 
-//function declarations
-function startUp() {
-	correctCount = 0;
-	incorrectCount = 0;
-	outOfTimeCount = 0;
-	console.log('correctCount', correctCount);
-	console.log('incorrectCount', incorrectCount);
-	
-	$(document).ready(function(){
-		$('#start').one("click", function(){
-			questionGenerator();
-		});
-	});
-}
+  questions: questions,
+  currentQuestion: 0,
+  counter: countStartNumber,
+  correct: 0,
+  incorrect: 0,
 
-function questionGenerator() {
-
-	var delay = 1000 * 5;
-	var userChoice;
-	var i = 0;
-
-	displayLoop();
-
-	function displayLoop() {
-		if (i < Object.keys(questions).length) {
-			setTimeout(iterator, delay);
-
-        	function iterator() {
-        		i++;
-            	console.log(i);
-            	displayLoop();
-        	}
-
-			console.log('counter');
-			$('h2').text(Object.values(questions)[i].question);
-			$('#start').html('<h3 data-name="choice-a">' + Object.values(choices)[i][0]);
-			$('#start').append('<h3 data-name="choice-b">' + Object.values(choices)[i][1]);
-			$('#start').append('<h3 data-name="choice-c">' + Object.values(choices)[i][2]);
-			$('#start').append('<h3 data-name="choice-d">' + Object.values(choices)[i][3]);
-
-			$(document).on('click', 'h3', function() {
-				clearTimeout(setTimeout(iterator, delay));
-				userChoice = $(this).text();
-				console.log('userChoice', userChoice);
-
-				if (userChoice === Object.values(questions)[i].correct) {
-					correctCount++;
-					console.log('correctCount', correctCount);
-					
-				}
-
-				else if (userChoice != Object.values(questions)[i].correct && userChoice != 'START GAME') {
-					incorrectCount++;
-					console.log('incorrectCount', incorrectCount);
-				
-				}
-			});
-		}
-
-		else if (i === Object.keys(questions).length) {
-			$('h2').text('Game Summary');
-			$('#start').html('<h3 id="correct-count">Correct Answer Total: ' + correctCount);
-			$('#start').append('<h3 id="incorrect-count">Incorrect Answer Total: ' + incorrectCount);
-			$('#start').append('<h3 id="correct-count">Unsanswered Total: ' + outOfTimeCount);
-			clearTimeout(iterator);
-		
-		}
+  countdown: function() {
+    game.counter--;
+    $("#counter-number").html(game.counter);
+    if (game.counter === 0) {
+      console.log("TIME UP");
+      game.timeUp();
     }
-}
+  },
 
+  loadQuestion: function() {
 
-startUp();
+    timer = setInterval(game.countdown, 1000);
 
+    panel.html("<h2>" + questions[this.currentQuestion].question + "</h2>");
 
+    for (var i = 0; i < questions[this.currentQuestion].answers.length; i++) {
+      panel.append("<button class='answer-button' id='button' data-name='" + questions[this.currentQuestion].answers[i]
+      + "'>" + questions[this.currentQuestion].answers[i] + "</button>");
+    }
+  },
 
+  nextQuestion: function() {
+    game.counter = countStartNumber;
+    $("#counter-number").html(game.counter);
+    game.currentQuestion++;
+    game.loadQuestion();
+  },
+
+  timeUp: function() {
+
+    clearInterval(timer);
+
+    $("#counter-number").html(game.counter);
+
+    panel.html("<h2>Out of Time!</h2>");
+    panel.append("<h3>The Correct Answer was: " + questions[this.currentQuestion].correctAnswer);
+    panel.append("<img src='" + questions[this.currentQuestion].image + "' />");
+
+    if (game.currentQuestion === questions.length - 1) {
+      setTimeout(game.results, 3 * 1000);
+    }
+    else {
+      setTimeout(game.nextQuestion, 3 * 1000);
+    }
+  },
+
+  results: function() {
+
+    clearInterval(timer);
+
+    panel.html("<h2>All done, heres how you did!</h2>");
+
+    $("#counter-number").html(game.counter);
+
+    panel.append("<h3>Correct Answers: " + game.correct + "</h3>");
+    panel.append("<h3>Incorrect Answers: " + game.incorrect + "</h3>");
+    panel.append("<h3>Unanswered: " + (questions.length - (game.incorrect + game.correct)) + "</h3>");
+    panel.append("<br><button id='start-over'>Start Over?</button>");
+  },
+
+  clicked: function(e) {
+    clearInterval(timer);
+    if ($(e.target).attr("data-name") === questions[this.currentQuestion].correctAnswer) {
+      this.answeredCorrectly();
+    }
+    else {
+      this.answeredIncorrectly();
+    }
+  },
+
+  answeredIncorrectly: function() {
+
+    game.incorrect++;
+
+    clearInterval(timer);
+
+    panel.html("<h2>Nope!</h2>");
+    panel.append("<h3>The Correct Answer was: " + questions[game.currentQuestion].correctAnswer + "</h3>");
+    panel.append("<img src='" + questions[game.currentQuestion].image + "' />");
+
+    if (game.currentQuestion === questions.length - 1) {
+      setTimeout(game.results, 3 * 1000);
+    }
+    else {
+      setTimeout(game.nextQuestion, 3 * 1000);
+    }
+  },
+
+  answeredCorrectly: function() {
+
+    clearInterval(timer);
+
+    game.correct++;
+
+    panel.html("<h2>Correct!</h2>");
+    panel.append("<img src='" + questions[game.currentQuestion].image + "' />");
+
+    if (game.currentQuestion === questions.length - 1) {
+      setTimeout(game.results, 3 * 1000);
+    }
+    else {
+      setTimeout(game.nextQuestion, 3 * 1000);
+    }
+  },
+
+  reset: function() {
+    this.currentQuestion = 0;
+    this.counter = countStartNumber;
+    this.correct = 0;
+    this.incorrect = 0;
+    this.loadQuestion();
+  }
+};
+
+// CLICK EVENTS
+
+$(document).on("click", "#start-over", function() {
+  game.reset();
+});
+
+$(document).on("click", ".answer-button", function(e) {
+  game.clicked(e);
+});
+
+$(document).on("click", "#start", function() {
+  $("#sub-wrapper").prepend("<h2>Time Remaining: <span id='counter-number'>30</span> Seconds</h2>");
+  game.loadQuestion();
+});
