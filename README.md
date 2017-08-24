@@ -1,2 +1,2 @@
 # TriviaGame
-Please clone down file and grade. Website link isn't working. 
+Fun trivia game based on show called Friends. Answer the trivia questions to see how well you know Friends. 
